@@ -1,0 +1,23 @@
+.file-node-button {
+    background-color: #f0f0f0; /* Light gray background */
+    border: 1px solid #ccc; /* Light gray border */
+    border-radius: 4px; /* Rounded corners */
+    padding: 8px 16px; /* Padding around text */
+    margin: 4px 0; /* Margin between buttons */
+    text-align: left; /* Align text to the left */
+    width: 100%; /* Full width */
+    cursor: pointer; /* Pointer cursor on hover */
+    display: flex; /* Flexbox for alignment */
+    align-items: center; /* Center items vertically */
+    font-size: 16px; /* Font size */
+    font-family: monospace;
+  }
+  
+  .file-node-button:hover {
+    background-color: #e0e0e0; /* Slightly darker gray on hover */
+  }
+  
+  .file-node-button:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 0 2px #007bff; /* Blue outline on focus */
+  }
