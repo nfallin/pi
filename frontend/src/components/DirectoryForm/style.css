@@ -1,0 +1,11 @@
+.form-contents-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.directory-form {
+    width: 100%; /* Make the input take up the full width of the container */
+    padding: 8px; /* Optional: add padding inside the input field */
+    box-sizing: border-box; /* Ensure padding is included in width */
+}

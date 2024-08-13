@@ -3,7 +3,7 @@ import FileExplorer from "./components/FileExplorer"
 
 function App() {
   return (
-    <div>
+    <div className="font">
       <FileExplorer></FileExplorer>
     </div>
   )

@@ -12,6 +12,10 @@ frontend/coverage
 frontend/build
 frontend/dist
 
+# public
+public/README.json
+public/config.json
+
 # Config
 frontend/public/config.json
 

@@ -1,0 +1,23 @@
+.file-node-button {
+    border-radius: 4px;
+    padding: 8px 16px;
+    margin: 4px 0;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-node-button:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .file-node-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #007bff;
+  }
