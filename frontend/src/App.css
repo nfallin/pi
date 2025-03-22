@@ -1,3 +1,12 @@
 .font {
     font-family: monospace;
 }
+
+.main-container {
+    display:flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    gap:4px;
+    padding: 4px;
+  }
+  

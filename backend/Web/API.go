@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -38,4 +39,32 @@ func getFileDirectory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, formattedDirectory)
+}
+
+func streamFile(c *gin.Context) {
+	var requestBody directoryStructureBody
+
+	if err := c.ShouldBindJSON(&requestBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	fmt.Println(requestBody.Directory)
+	filePath := requestBody.Directory
+
+
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+
+	// baseDir := "" // pi parent directory
+	// absPath, err := filepath.Abs(filePath)
+	// if err != nil || !filepath.HasPrefix(absPath, baseDir) {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file path"})
+	// 	return
+	// }
+
+	// serve the requested file here
+	c.File(filePath);
 }

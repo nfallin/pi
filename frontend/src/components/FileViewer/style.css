@@ -1,0 +1,8 @@
+.file-viewer-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 2px);
+    border: 1px solid #ccc;
+    width: 900px;
+  }
+  

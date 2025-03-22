@@ -40,7 +40,7 @@ func Serve() {
 
 	router.SetTrustedProxies(nil)
 	defineRoutes(router)
-	router.Static("/", "../frontend/dist")
+	router.Static("/static", "../frontend/dist")
 	// router.Run("localhost:8080")
 	router.Run("0.0.0.0:8080")
 }
@@ -49,4 +49,5 @@ func Serve() {
 func defineRoutes(r *gin.Engine) {
 	// api routes
 	r.POST("/files", getFileDirectory)
+	r.POST("/stream", streamFile)
 }

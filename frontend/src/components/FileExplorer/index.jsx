@@ -3,7 +3,7 @@ import FileNode from '../FileNode';
 import DirectoryForm from '../DirectoryForm'
 import './style.css'
 
-export default function FileExplorer() {
+export default function FileExplorer({setFileURL, setFileType}) {
     const[config, setConfig] = useState({});
     const[currentDirectory, setCurrentDirectory] = useState("");
     const[server, setServer] = useState("");
@@ -16,7 +16,7 @@ export default function FileExplorer() {
     }, []);
 
     async function fetchConfig() {
-        const reponse = await fetch('/config.json');
+        const reponse = await fetch('/static/config.json');
         const configData = await reponse.json();
         setConfig(configData);
     }
@@ -61,6 +61,35 @@ export default function FileExplorer() {
         }
     }
 
+    async function fetchFile(path) {
+        try {
+            const url = `${server}/stream`
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ directory: path })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const blob = await response.blob();
+
+            if (blob) {
+                const fileURL = URL.createObjectURL(blob);
+                const fileType = response.headers.get("Content-Type") || "application/octet-stream";
+
+                setFileURL(fileURL);
+                setFileType(fileType);
+            }
+
+        } catch(error) {
+            console.error('Error fetching file in FileExplorer:', error);
+        }
+    }
+
     // move down to the specified directory   
     function navigateDown(file) {
         if (file.is_dir) {
@@ -68,6 +97,10 @@ export default function FileExplorer() {
         } else {
             // look into firing custom events that the file detail component listens for 
             console.log(`requesting file data for ${file.name}`)
+            
+            // fetch file data and print it to console.log
+            fetchFile(`${currentDirectory}/${file.name}`)
+
         }
     }
 
