@@ -6,14 +6,18 @@ html, body {
 .file-explorer-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 2px);
+  height: calc(100vh - 12px);
   border: 1px solid #ccc;
   width: 300px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .nav-tools-container {
   display:flex;
   flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   flex-shrink: 0;
   gap:4px;
   padding: 4px;
@@ -30,6 +34,7 @@ html, body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: monospace;
 }
 
 .back-button-disabled {
@@ -47,8 +52,8 @@ html, body {
 }
 
 .current-directory-container {
-  width: 300px; /* Set a fixed or flexible width */
   padding-left: 4px;
+  background-color: #ccc;
 }
 
 .current-directory {
@@ -59,8 +64,8 @@ html, body {
 
 .file-list-container {
   flex: 1;
-  width: 300px;
   overflow-y:scroll;
+  padding-right: 4px;
 }
 
 .file-list {
@@ -76,4 +81,8 @@ html, body {
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
+}
+
+.collapse-button {
+  margin-left: auto;
 }

@@ -3,12 +3,12 @@ import FileNode from '../FileNode';
 import DirectoryForm from '../DirectoryForm'
 import './style.css'
 
-export default function FileExplorer({setFileURL, setFileType}) {
+export function refreshList() {}
+
+export default function FileExplorer({setFileURL, setFileType, setFileName, currentDirectory, setCurrentDirectory, server, setServer, files, fetchChildren}) {
     const[config, setConfig] = useState({});
-    const[currentDirectory, setCurrentDirectory] = useState("");
-    const[server, setServer] = useState("");
-    const[files, setFiles] = useState([]);
     const[advanced, setAdvanced] = useState(false);
+    const[collapsed, setCollapsed] = useState(false);
 
     // fetch config data on component mount
     useEffect(() => {
@@ -16,7 +16,7 @@ export default function FileExplorer({setFileURL, setFileType}) {
     }, []);
 
     async function fetchConfig() {
-        const reponse = await fetch('/static/config.json');
+        const reponse = await fetch('/config.json');
         const configData = await reponse.json();
         setConfig(configData);
     }
@@ -35,33 +35,7 @@ export default function FileExplorer({setFileURL, setFileType}) {
         }
     }, [currentDirectory, server]);
 
-    // obtain a list of files in a given directory on the machine the server is running on
-    async function fetchChildren(path) {
-        try {
-            const url = `${server}/files`
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ directory: path })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const dirContents = await response.json();
-            if (dirContents.children) {
-              setFiles(dirContents.children);
-            } else {
-              setFiles([]);
-            }
-        } catch(error) {
-            console.error('Error fetching directory in FileExplorer:', error);
-        }
-    }
-
-    async function fetchFile(path) {
+    async function fetchFile(path, name) {
         try {
             const url = `${server}/stream`
             const response = await fetch(url, {
@@ -81,8 +55,11 @@ export default function FileExplorer({setFileURL, setFileType}) {
                 const fileURL = URL.createObjectURL(blob);
                 const fileType = response.headers.get("Content-Type") || "application/octet-stream";
 
+                // window.open(fileURL);
+
                 setFileURL(fileURL);
                 setFileType(fileType);
+                setFileName(name);
             }
 
         } catch(error) {
@@ -96,10 +73,10 @@ export default function FileExplorer({setFileURL, setFileType}) {
             setCurrentDirectory(`${currentDirectory}/${file.name}`);
         } else {
             // look into firing custom events that the file detail component listens for 
-            console.log(`requesting file data for ${file.name}`)
+            console.log(`requesting file data for ${file.name}`);
             
             // fetch file data and print it to console.log
-            fetchFile(`${currentDirectory}/${file.name}`)
+            fetchFile(`${currentDirectory}/${file.name}`, file.name);
 
         }
     }
@@ -140,8 +117,12 @@ export default function FileExplorer({setFileURL, setFileType}) {
         return name.startsWith('.') || name == 'desktop.ini' || name == 'thumbs.db'
     }
 
+    function toggleCollapsed() {
+        setCollapsed(!collapsed);
+    }
+
     return (
-        <div className='file-explorer-container'>
+        <div className='file-explorer-container' style={{marginLeft: collapsed ? "-238px" : "0px", transition: "margin-left 0.3s ease-in-out"}}>
             {/* navigation options */}
             <div className='nav-tools-container'>
                 <button className={"back-button " + (atHome() ? "back-button-disabled" : "")} onClick={navigateUp}>
@@ -153,6 +134,11 @@ export default function FileExplorer({setFileURL, setFileType}) {
                         type="checkbox" checked={advanced} onChange={toggleAdvanced}/>
                     advanced
                 </label>
+                
+                <button className ="collaspe-button, back-button" onClick={toggleCollapsed}>
+                    {collapsed ? "expand" : "collapse"}
+                </button>
+
             </div>
 
             {/* current directory display */}

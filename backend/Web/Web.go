@@ -13,6 +13,11 @@ type directoryStructureBody struct {
 	Directory string `json:"directory" binding:"required"`
 }
 
+type fileUploadStructureBody struct {
+	File string `json:"file" binding:"required"`
+	Directory string `json:"directory" binding:"required"`
+}
+
 // starts the router
 func Serve() {
 
@@ -40,7 +45,7 @@ func Serve() {
 
 	router.SetTrustedProxies(nil)
 	defineRoutes(router)
-	router.Static("/static", "../frontend/dist")
+	router.Static("/", "../frontend/dist")
 	// router.Run("localhost:8080")
 	router.Run("0.0.0.0:8080")
 }
@@ -50,4 +55,5 @@ func defineRoutes(r *gin.Engine) {
 	// api routes
 	r.POST("/files", getFileDirectory)
 	r.POST("/stream", streamFile)
+	r.POST("/upload", uploadFile)
 }

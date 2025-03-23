@@ -1,8 +1,56 @@
 .file-viewer-container {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 2px);
+    height: calc(100vh - 12px);
+    width: 100%;
     border: 1px solid #ccc;
-    width: 900px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .button {
+    border-radius: 4px;
+    padding: 4px 8px; 
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: monospace;
   }
   
+  .button-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+
+  .current-file-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .file-menu-bar {
+    padding: 4px;
+    display: flex;
+    gap: 4px;
+    flex-direction: row;
+  }
+  
+  .current-file-name {
+    word-wrap: break-word; /* Old method */
+    overflow-wrap: break-word; /* Modern method */
+    white-space: normal; /* Allow text to wrap normally */
+  }
+
+  .current-file-background {
+    background-color: #ccc;
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    padding-left: 4px;
+  }

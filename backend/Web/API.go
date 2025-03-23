@@ -68,3 +68,32 @@ func streamFile(c *gin.Context) {
 	// serve the requested file here
 	c.File(filePath);
 }
+
+func uploadFile(c*gin.Context) {
+
+	file, err := c.FormFile("file");
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File not received"})
+		return
+	}
+
+	directory := c.PostForm("directory")
+	if (directory == "") {
+		directory = "C:\\Users\\sidek" // make this the parent directory or a default designated upload directory
+	}
+
+	_, err2 := os.Stat(directory)
+	if (os.IsNotExist(err2)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Directory does not exist"})
+		return
+	}
+
+	filePath := fmt.Sprintf("%s/%s", directory, file.Filename)
+	err3 := c.SaveUploadedFile(file, filePath) 
+	if (err3 != nil) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save file"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "path": filePath})
+}
