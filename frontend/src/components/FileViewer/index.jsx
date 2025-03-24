@@ -1,9 +1,7 @@
-import React, {useState, useEffect } from 'react';
 import './style.css'
-import { refreshList } from '../FileExplorer';
 
 
-export default function FileViewer({fileURL, setFileURL, fileType, setFileType, fileName, setFileName, currentDirectory, server, refreshList}) {
+export default function FileViewer({fileURL, fileType, fileName, currentDirectory, server, refreshList, closeFile}) {
 
     async function open() {
         if (fileURL) {
@@ -19,12 +17,6 @@ export default function FileViewer({fileURL, setFileURL, fileType, setFileType, 
             link.download = (fileName) ? fileName : "downloaded_file";
             link.click();
         }
-    }
-
-    async function close() {
-        setFileName("");
-        setFileType("");
-        setFileURL("");
     }
 
     async function upload() {
@@ -75,7 +67,7 @@ export default function FileViewer({fileURL, setFileURL, fileType, setFileType, 
                 <div className='file-menu-bar'>
                     <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={open}>open in new tab</button>
                     <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={download}>download selected file</button>
-                    <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={close}>close selected file</button>
+                    <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={closeFile}>close selected file</button>
                     <button className={"button "} onClick={upload}>upload to current directory</button>
                     <input id="fileInput" type="file" style={{ display: "none" }} onChange={handleFileChange} />
                 </div>
@@ -94,10 +86,12 @@ export default function FileViewer({fileURL, setFileURL, fileType, setFileType, 
             )}
 
             {fileType.startsWith("video") && (
-                <video key={fileURL} controls style={{ maxWidth: "100%", maxHeight: "100%" }}>
-                    <source src={fileURL} type={fileType} />
-                    Your browser does not support video playback.
-                </video>
+                <div style={{display: "flex", justifyContent: "center", alignItems: "center", maxWidth: "100%", maxHeight: "100%", overflow: "hidden"}}>
+                    <video key={fileURL} controls style={{ maxWidth: "100%", maxHeight: "100%", width: "auto", height: "auto", objectFit: "contain", display: "block", margin: "auto" }}>
+                        <source src={fileURL} type={fileType} />
+                        Your browser does not support video playback.
+                    </video>
+                </div>
             )}
 
             {fileType.startsWith("audio") && (

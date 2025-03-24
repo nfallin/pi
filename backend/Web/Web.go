@@ -13,41 +13,23 @@ type directoryStructureBody struct {
 	Directory string `json:"directory" binding:"required"`
 }
 
-type fileUploadStructureBody struct {
-	File string `json:"file" binding:"required"`
-	Directory string `json:"directory" binding:"required"`
-}
-
 // starts the router
 func Serve() {
 
 	router := gin.Default()
+	var localAddress string = "0.0.0.0:8080"
 
-	// allow cors
-	// router.Use(func(c *gin.Context) {
-	// 	c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-	// 	c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
-	// 	c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	// 	if c.Request.Method == "OPTIONS" {
-	// 		c.AbortWithStatus(http.StatusOK)
-	// 		return
-	// 	}
-	// 	c.Next()
-	// })
-
-	// allow cors
 	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
+	config.AllowOrigins = []string{"http://" + localAddress, "http://localhost:8080"}
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
-	config.AllowMethods = []string{"GET", "POST"}
+	config.AllowMethods = []string{"POST"}
 
 	router.Use(cors.New(config))
 
 	router.SetTrustedProxies(nil)
 	defineRoutes(router)
 	router.Static("/", "../frontend/dist")
-	// router.Run("localhost:8080")
-	router.Run("0.0.0.0:8080")
+	router.Run(localAddress)
 }
 
 // define get/post routes here

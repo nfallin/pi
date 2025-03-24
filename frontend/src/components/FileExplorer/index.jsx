@@ -5,70 +5,18 @@ import './style.css'
 
 export function refreshList() {}
 
-export default function FileExplorer({setFileURL, setFileType, setFileName, currentDirectory, setCurrentDirectory, server, setServer, files, fetchChildren}) {
-    const[config, setConfig] = useState({});
+export default function FileExplorer({refresh, currentDirectory, setCurrentDirectory, fetchFile, files, config}) {
     const[advanced, setAdvanced] = useState(false);
     const[collapsed, setCollapsed] = useState(false);
 
-    // fetch config data on component mount
-    useEffect(() => {
-        fetchConfig();
-    }, []);
-
-    async function fetchConfig() {
-        const reponse = await fetch('/config.json');
-        const configData = await reponse.json();
-        setConfig(configData);
-    }
-
-    // assign home directory and backend address based on config
-    // t_home/t_ip/t_port for windows, home/ip/port for pi
-    useEffect(() => {
-        setCurrentDirectory(config.home);
-        setServer(`http://${config.ip}:${config.port}`)
-    }, [config]);
-
-    // fetch children whenever the directory changes
-    useEffect(() => {
-        if (currentDirectory && server) {
-            fetchChildren(currentDirectory)
-        }
-    }, [currentDirectory, server]);
-
-    async function fetchFile(path, name) {
-        try {
-            const url = `${server}/stream`
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ directory: path })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const blob = await response.blob();
-
-            if (blob) {
-                const fileURL = URL.createObjectURL(blob);
-                const fileType = response.headers.get("Content-Type") || "application/octet-stream";
-
-                // window.open(fileURL);
-
-                setFileURL(fileURL);
-                setFileType(fileType);
-                setFileName(name);
-            }
-
-        } catch(error) {
-            console.error('Error fetching file in FileExplorer:', error);
-        }
-    }
-
     // move down to the specified directory   
     function navigateDown(file) {
+
+        // if no input is given, refresh the current directory
+        if (!file) {
+            fetchFiles(currentDirectory);
+        }
+
         if (file.is_dir) {
             setCurrentDirectory(`${currentDirectory}/${file.name}`);
         } else {
@@ -128,6 +76,8 @@ export default function FileExplorer({setFileURL, setFileType, setFileName, curr
                 <button className={"back-button " + (atHome() ? "back-button-disabled" : "")} onClick={navigateUp}>
                     back
                 </button>
+
+                <button className="back-button" onClick={refresh}>Refresh</button>
 
                 <label className='advanced-mode'>
                     <input
