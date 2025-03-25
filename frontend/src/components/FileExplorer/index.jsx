@@ -32,7 +32,7 @@ export default function FileExplorer({refresh, currentDirectory, setCurrentDirec
     // returns true if the current directory is the home directory
     // helper function for navigateUp
     function atHome() {
-        return currentDirectory == config.home
+        return currentDirectory == config.home;
     }
 
     // move up to the previous directory

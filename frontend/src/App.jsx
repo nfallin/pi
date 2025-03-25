@@ -1,19 +1,17 @@
+import { useState, useEffect } from "react";
 import "./App.css"
-import React, {useState, useEffect} from 'react';
-import FileExplorer from "./components/FileExplorer"
-import FileViewer from "./components/FileViewer"
+import Dashboard from "./components/Dashboard";
 
 function App() {
     
-    const[fileURL, setFileURL] = useState("");
-    const[fileType, setFileType] = useState("");
-    const[fileName, setFileName] = useState("");
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [password, setPassword] = useState("");
     const[currentDirectory, setCurrentDirectory] = useState("");
+
     const[server, setServer] = useState("");
-    const[files, setFiles] = useState([]);
-    const[config, setConfig] = useState({});
+    const [config, setConfig] = useState([]);
     
-    // fetch config data on component mount
+    // fetch server data and check authentication on component mount
     useEffect(() => {
         fetchConfig();
     }, []);
@@ -21,96 +19,61 @@ function App() {
     async function fetchConfig() {
         const reponse = await fetch('/config.json');
         const configData = await reponse.json();
+        setServer(`http://${configData.ip}:${configData.port}`);
+        setCurrentDirectory(configData.home);
         setConfig(configData);
+
+        checkAuth(configData);
     }
-    
-    // assign home directory and backend address based on config
+
+    async function checkAuth(configData) {
+        const url = `http://${configData.ip}:${configData.port}/files`
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ directory: configData.home }),
+            credentials: "include"
+        });
+
+        setIsLoggedIn(response.ok);
+        console.log("status: ", response.status);
+        console.log("authorized: ", response.ok);
+    }
+
     useEffect(() => {
-        setCurrentDirectory(config.home);
-        setServer(`http://${config.ip}:${config.port}`)
-    }, [config]);
-    
-    // fetch children whenever the directory changes
-    useEffect(() => {
-        if (currentDirectory && server) {
-            fetchChildren(currentDirectory)
-        }
-    }, [currentDirectory, server]);
-    
-    // obtain a list of files in a given directory on the machine the server is running on
-    async function fetchChildren(path) {
-        try {
-            const url = `${server}/files`
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ directory: path })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const dirContents = await response.json();
-            if (dirContents.children) {
-                setFiles(dirContents.children);
-            } else {
-                setFiles([]);
-            }
-        } catch(error) {
-            console.error('Error fetching directory in FileExplorer:', error);
+        console.log("Login state updated:", isLoggedIn);
+    }, [isLoggedIn]);  // This will log every time `isLoggedIn` changes
+
+    async function handleLogin(e) {
+        e.preventDefault();
+
+        const response = await fetch(`${server}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({password}),
+        });
+
+        if (response.ok) {
+            setIsLoggedIn(true);
+        } else {
+            alert("Incorrect Password");
         }
     }
-    
-    async function refresh() {
-        fetchChildren(currentDirectory);
-    }
-    
-    async function fetchFile(path, name) {
-        try {
-            const url = `${server}/stream`
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ directory: path })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const blob = await response.blob();
-            
-            if (blob) {
-                const fileURL = URL.createObjectURL(blob);
-                const fileType = response.headers.get("Content-Type") || "application/octet-stream";
-                
-                // window.open(fileURL);
-                
-                setFileURL(fileURL);
-                setFileType(fileType);
-                setFileName(name);
-            }
-            
-        } catch(error) {
-            console.error('Error fetching file in FileExplorer:', error);
-        }
-    }
-    
-    async function closeFile() {
-        setFileName("");
-        setFileType("");
-        setFileURL("");
-    }
-    
+
     return (
-        <div className="font">
-        <div className="main-container">
-        <FileExplorer fetchFile={fetchFile} refresh={refresh} currentDirectory={currentDirectory} setCurrentDirectory={setCurrentDirectory} server={server} files={files} config={config}></FileExplorer>
-        <FileViewer fileURL={fileURL} fileType={fileType} fileName={fileName} currentDirectory={currentDirectory} server={server} refreshList={fetchChildren} closeFile={closeFile}></FileViewer>
-        </div>
+        <div>
+            {isLoggedIn && (
+                <Dashboard server={server} currentDirectory={currentDirectory} setCurrentDirectory={setCurrentDirectory} config={config} setIsLoggedIn={setIsLoggedIn}/>
+            )}
+
+            {!isLoggedIn && (
+                <form onSubmit={handleLogin}>
+                    <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required></input>
+                    <button type="submit">Login</button>
+                </form>
+            )}
         </div>
     )
 }

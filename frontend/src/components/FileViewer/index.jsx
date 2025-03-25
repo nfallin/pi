@@ -1,7 +1,7 @@
 import './style.css'
 
 
-export default function FileViewer({fileURL, fileType, fileName, currentDirectory, server, refreshList, closeFile}) {
+export default function FileViewer({fileURL, fileType, fileName, currentDirectory, server, refreshList, closeFile, setIsLoggedIn}) {
 
     async function open() {
         if (fileURL) {
@@ -42,6 +42,7 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
             const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
+                credentials: "include"
             });
 
             if (!response.ok) {
@@ -58,6 +59,26 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
 
     }
 
+    async function handleLogout() {
+        try {
+            // Call the logout API endpoint
+            const response = await fetch(`${server}/logout`, {
+                method: 'POST',
+                credentials: 'include', // Ensure cookies are sent with the request
+            });
+
+            if (response.ok) {
+                // Successfully logged out
+                setIsLoggedIn(false); // Update the login state
+                console.log('Successfully logged out');
+            } else {
+                console.error('Failed to log out');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
+        }
+    }
+
     return (
         <div className='file-viewer-container'>
 
@@ -69,6 +90,7 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
                     <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={download}>download selected file</button>
                     <button className={"button " + ((!fileURL) ? "button-disabled" : "")} onClick={closeFile}>close selected file</button>
                     <button className={"button "} onClick={upload}>upload to current directory</button>
+                    <button className={"button "} onClick={handleLogout}>Log out</button>
                     <input id="fileInput" type="file" style={{ display: "none" }} onChange={handleFileChange} />
                 </div>
 

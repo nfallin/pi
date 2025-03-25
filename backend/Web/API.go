@@ -1,6 +1,7 @@
 package Web
 
 import (
+	"time"
 	"backend/File"
 	"encoding/json"
 	"fmt"
@@ -9,12 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 
 
 func cleanDirectory(dir string) string {
-	return filepath.Clean(strings.ToLower(strings.TrimSpace(dir)))
+	return filepath.Clean(strings.TrimSpace(dir))
 }
 
 // *****************
@@ -136,6 +138,13 @@ func uploadFile(c*gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access Denied"})
 		return
 	}
+
+	// verify directory exists
+	_, err4 := os.Stat(absoluteDir)
+	if (os.IsNotExist(err4)) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Directory does not exist"})
+    	return
+	}
 	
 	filePath := fmt.Sprintf("%s/%s", absoluteDir, file.Filename)
 
@@ -147,11 +156,51 @@ func uploadFile(c*gin.Context) {
 	} 
 
 	// save the file
-	err4 := c.SaveUploadedFile(file, filePath) 
-	if (err4 != nil) {
+	err5 := c.SaveUploadedFile(file, filePath) 
+	if (err5 != nil) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to save file"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "path": filePath})
+}
+
+const password = "test"
+
+func handleLogin(c* gin.Context) {
+	var requestBody loginStructureBody
+
+	// verify request
+	if err := c.ShouldBindJSON(&requestBody); (err != nil) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Bad request"})
+		return
+	}
+
+	// disgusting hardcoded password (will change later)
+	if (requestBody.Password != password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"username": "Nolan", "exp": time.Now().Add(time.Hour).Unix(),})
+
+	secretKey, err0 := os.ReadFile("jwt_secret")
+	if (err0 != nil) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve key"})
+	}
+	
+	tokenString, err := token.SignedString([]byte(secretKey))
+	if (err != nil) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
+	}
+
+	c.SetCookie("auth_token", tokenString, 3600, "/", "192.168.1.145", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+}
+
+func handleLogout(c *gin.Context) {
+	c.SetCookie("auth_token", "", -1, "/", "192.168.1.145", false, true)
+	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }
