@@ -13,18 +13,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-
-
 func cleanDirectory(dir string) string {
 	return filepath.Clean(strings.TrimSpace(dir))
 }
 
+
 // *****************
 // * API Functions *
 // *****************
-
-// set to the same parent directory defined in the frontend's config.json
-var parentDir = cleanDirectory("C:/Users/sidek")
 
 // when the user navigates to a new directory, return all subpaths of that directory to display in the explorer list
 func getFileDirectory(c *gin.Context) {
@@ -40,8 +36,12 @@ func getFileDirectory(c *gin.Context) {
 	absoluteDir, err0 := filepath.Abs(requestBody.Directory)
 	absoluteDir = cleanDirectory(absoluteDir)
 
+	fmt.Println("request body: ", requestBody.Directory)
+	fmt.Println("absoluteDir: ", absoluteDir)
+	fmt.Println("parent from config: ", getConfig().Home)
+
 	// verify parent directory is maintained
-	if (err0 != nil || !strings.HasPrefix(absoluteDir, parentDir)) {
+	if (err0 != nil || !strings.HasPrefix(absoluteDir, getConfig().Home)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -82,7 +82,7 @@ func streamFile(c *gin.Context) {
 	absoluteDir = cleanDirectory(absoluteDir)
 
 	// verify parent directory is maintained
-	if (err0 != nil || !strings.HasPrefix(absoluteDir, parentDir)) {
+	if (err0 != nil || !strings.HasPrefix(absoluteDir, getConfig().Home)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
 		return
 	}
@@ -126,7 +126,7 @@ func uploadFile(c*gin.Context) {
 	// default to parent directory
 	directory := c.PostForm("directory")
 	if (directory == "") {
-		directory = parentDir
+		directory = getConfig().Home
 	}
 
 	// clean the inputted directory
@@ -134,7 +134,7 @@ func uploadFile(c*gin.Context) {
 	absoluteDir = cleanDirectory(absoluteDir)
 	
 	// verify parent directory is maintained
-	if (err != nil || !strings.HasPrefix(absoluteDir, parentDir)) {
+	if (err != nil || !strings.HasPrefix(absoluteDir, getConfig().Home)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access Denied"})
 		return
 	}
@@ -195,12 +195,12 @@ func handleLogin(c* gin.Context) {
 		return
 	}
 
-	c.SetCookie("auth_token", tokenString, 3600, "/", "192.168.1.145", false, true)
+	c.SetCookie("auth_token", tokenString, 3600, "/", getConfig().IP, false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
 }
 
 func handleLogout(c *gin.Context) {
-	c.SetCookie("auth_token", "", -1, "/", "192.168.1.145", false, true)
+	c.SetCookie("auth_token", "", -1, "/", getConfig().IP, false, true)
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
 }

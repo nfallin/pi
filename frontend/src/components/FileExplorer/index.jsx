@@ -19,13 +19,9 @@ export default function FileExplorer({refresh, currentDirectory, setCurrentDirec
 
         if (file.is_dir) {
             setCurrentDirectory(`${currentDirectory}/${file.name}`);
-        } else {
-            // look into firing custom events that the file detail component listens for 
-            console.log(`requesting file data for ${file.name}`);
-            
+        } else {            
             // fetch file data and print it to console.log
             fetchFile(`${currentDirectory}/${file.name}`, file.name);
-
         }
     }
 

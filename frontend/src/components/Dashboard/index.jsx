@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import FileExplorer from "../FileExplorer"
 import FileViewer from "../FileViewer"
 
-function Dashboard({server, currentDirectory, setCurrentDirectory, config, setIsLoggedIn}) {
+export default function Dashboard({server, currentDirectory, setCurrentDirectory, config, setIsLoggedIn}) {
     
     const[fileURL, setFileURL] = useState("");
     const[fileType, setFileType] = useState("");
@@ -103,5 +103,3 @@ function Dashboard({server, currentDirectory, setCurrentDirectory, config, setIs
         </div>
     )
 }
-
-export default Dashboard

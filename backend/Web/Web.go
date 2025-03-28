@@ -3,6 +3,8 @@ package Web
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
+	"fmt"
 )
 
 // ***************************
@@ -20,12 +22,18 @@ type loginStructureBody struct {
 // starts the router
 func Serve() {
 
+	ReadConfig()
+	fmt.Println("IP: ", getConfig().IP)
+	fmt.Println("Port: ", getConfig().Port)
+	fmt.Println("Home: ", getConfig().Home)
+
 	router := gin.Default()
-	var localAddress string = "0.0.0.0:8080"
+	var address string = getConfig().IP + ":" + getConfig().Port
+
 
 	// set cors configurations
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://" + localAddress, "http://localhost:8080", "http://192.168.1.145:8080"}
+	config.AllowOrigins = []string{"http://" + address}
 	config.AllowHeaders = []string{"Origin", "Content-Type"}
 	config.AllowMethods = []string{"POST"}
 	config.AllowCredentials = true
@@ -38,18 +46,22 @@ func Serve() {
 	router.SetTrustedProxies(nil)
 	defineRoutes(router)
 	router.Static("/", "../frontend/dist")
-	router.Run(localAddress)
+	router.Run(address)
 }
 
 // define get/post routes here
 func defineRoutes(r *gin.Engine) {
 
+	loginLimiter := rate.NewLimiter(rate.Limit(1.0/60.0), 3)
+	generalLimiter := rate.NewLimiter(rate.Limit(1.0/60.0), 100)
+
 	// unprotected API routes
-	r.POST("/login", handleLogin)
-	r.POST("/logout", handleLogout)
+	r.POST("/login", RateLimitMiddleware(loginLimiter), handleLogin)
+	r.POST("/logout", RateLimitMiddleware(generalLimiter), handleLogout)
 
 	protected := r.Group("/")
 	protected.Use(AuthenticationMiddleware())
+	protected.Use(RateLimitMiddleware(generalLimiter))
 
 	// protected API routes
 	protected.POST("/files", getFileDirectory)

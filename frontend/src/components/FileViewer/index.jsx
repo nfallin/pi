@@ -5,7 +5,6 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
 
     async function open() {
         if (fileURL) {
-            console.log("opening: ", fileURL);
             window.open(fileURL);
         }
     }
@@ -21,7 +20,6 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
 
     async function upload() {
         document.getElementById("fileInput").click();
-        console.log("current directory: ", currentDirectory);
     }
 
     async function handleFileChange(event) {
@@ -33,9 +31,6 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
         const formData = new FormData;
         formData.append("file", uploadedFile);
         formData.append("directory", currentDirectory);
-
-        console.log("File in FormData:", formData.get("file")); 
-        console.log("Directory in FormData:", formData.get("directory"));
 
         try {
             const url = `${server}/upload`
@@ -49,7 +44,6 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const contents = await response.json();
-            console.log("file uploaded successfully: ", contents);
             refreshList(currentDirectory);
             
 
@@ -70,7 +64,6 @@ export default function FileViewer({fileURL, fileType, fileName, currentDirector
             if (response.ok) {
                 // Successfully logged out
                 setIsLoggedIn(false); // Update the login state
-                console.log('Successfully logged out');
             } else {
                 console.error('Failed to log out');
             }

@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import "./App.css"
 import Dashboard from "./components/Dashboard";
+import LoginForm from "./components/LoginForm";
+
+// global rate limiting on API calls / timeout bans on login attempts
+// more robust account system for multiple users and associated parent directories
+// toggleable IP whitelist
+// encrypt passwords before sending back and forth and storing
 
 function App() {
     
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [password, setPassword] = useState("");
     const[currentDirectory, setCurrentDirectory] = useState("");
 
     const[server, setServer] = useState("");
@@ -17,16 +22,16 @@ function App() {
     }, []);
     
     async function fetchConfig() {
-        const reponse = await fetch('/config.json');
-        const configData = await reponse.json();
+        const response = await fetch('/config.json');
+        const configData = await response.json();
         setServer(`http://${configData.ip}:${configData.port}`);
         setCurrentDirectory(configData.home);
         setConfig(configData);
-
         checkAuth(configData);
     }
 
     async function checkAuth(configData) {
+
         const url = `http://${configData.ip}:${configData.port}/files`
         const response = await fetch(url, {
             method: 'POST',
@@ -38,28 +43,6 @@ function App() {
         });
 
         setIsLoggedIn(response.ok);
-        console.log("status: ", response.status);
-        console.log("authorized: ", response.ok);
-    }
-
-    useEffect(() => {
-        console.log("Login state updated:", isLoggedIn);
-    }, [isLoggedIn]);  // This will log every time `isLoggedIn` changes
-
-    async function handleLogin(e) {
-        e.preventDefault();
-
-        const response = await fetch(`${server}/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({password}),
-        });
-
-        if (response.ok) {
-            setIsLoggedIn(true);
-        } else {
-            alert("Incorrect Password");
-        }
     }
 
     return (
@@ -69,10 +52,7 @@ function App() {
             )}
 
             {!isLoggedIn && (
-                <form onSubmit={handleLogin}>
-                    <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required></input>
-                    <button type="submit">Login</button>
-                </form>
+                <LoginForm server={server} setIsLoggedIn={setIsLoggedIn}></LoginForm>
             )}
         </div>
     )

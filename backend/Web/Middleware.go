@@ -5,6 +5,7 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"golang.org/x/time/rate"
 )
 
 
@@ -24,6 +25,8 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		secretKey, err0 := os.ReadFile("jwt_secret")
 		if (err0 != nil) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve key"})
+			c.Abort()
+			return
 		}
 
 		// parse and validate token
@@ -36,6 +39,18 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 
 		if (err != nil || !token.Valid) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func RateLimitMiddleware(limiter *rate.Limiter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if (!limiter.Allow()) {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Too many requests"})
 			c.Abort()
 			return
 		}
