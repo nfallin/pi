@@ -165,8 +165,6 @@ func uploadFile(c*gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "path": filePath})
 }
 
-const password = "test"
-
 func handleLogin(c* gin.Context) {
 	var requestBody loginStructureBody
 
@@ -176,8 +174,15 @@ func handleLogin(c* gin.Context) {
 		return
 	}
 
+	// read password from credentials file
+	password, err := os.ReadFile("credentials")
+	if (err != nil) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retreive credentials"})
+		return
+	}
+
 	// disgusting hardcoded password (will change later)
-	if (requestBody.Password != password) {
+	if (requestBody.Password != string(password)) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
