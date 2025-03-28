@@ -10,7 +10,7 @@ import (
 // * POST request structures *
 // ***************************
 
-type directoryStructureBody struct {d
+type directoryStructureBody struct {
 	Directory string `json:"directory" binding:"required"`
 }
 
