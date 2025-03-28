@@ -20,7 +20,7 @@ export default function FileExplorer({refresh, currentDirectory, setCurrentDirec
         if (file.is_dir) {
             setCurrentDirectory(`${currentDirectory}/${file.name}`);
         } else {            
-            // fetch file data and print it to console.log
+            // fetch file data
             fetchFile(`${currentDirectory}/${file.name}`, file.name);
         }
     }

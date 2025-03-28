@@ -18,7 +18,6 @@ func GetDirectoryStructure(directory string) ([]byte, error) {
 
 	jsonData, err := json.MarshalIndent(root, "", " ")
 	if err != nil {
-		fmt.Println("Error: ", err)
 		return nil, err
 	}
 
@@ -28,7 +27,6 @@ func GetDirectoryStructure(directory string) ([]byte, error) {
 func scanDirectory(path string) FileInfo {
 	info, err := os.Stat(path)
 	if err != nil {
-		fmt.Println("Error: ", err)
 		return FileInfo{}
 	}
 

@@ -4,14 +4,13 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
-	"fmt"
 )
 
 // ***************************
 // * POST request structures *
 // ***************************
 
-type directoryStructureBody struct {
+type directoryStructureBody struct {d
 	Directory string `json:"directory" binding:"required"`
 }
 
@@ -23,9 +22,6 @@ type loginStructureBody struct {
 func Serve() {
 
 	ReadConfig()
-	fmt.Println("IP: ", getConfig().IP)
-	fmt.Println("Port: ", getConfig().Port)
-	fmt.Println("Home: ", getConfig().Home)
 
 	router := gin.Default()
 	var address string = getConfig().IP + ":" + getConfig().Port

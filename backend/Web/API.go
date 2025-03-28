@@ -36,10 +36,6 @@ func getFileDirectory(c *gin.Context) {
 	absoluteDir, err0 := filepath.Abs(requestBody.Directory)
 	absoluteDir = cleanDirectory(absoluteDir)
 
-	fmt.Println("request body: ", requestBody.Directory)
-	fmt.Println("absoluteDir: ", absoluteDir)
-	fmt.Println("parent from config: ", getConfig().Home)
-
 	// verify parent directory is maintained
 	if (err0 != nil || !strings.HasPrefix(absoluteDir, getConfig().Home)) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Access denied"})
